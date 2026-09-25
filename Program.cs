@@ -21,13 +21,13 @@ foreach (var app in applications)
     index++;
 }
 
+Console.Write("Введите номер программы: ");
+int number = int.Parse(Console.ReadLine());
 try
 {
-    Console.Write("Введите номер программы: ");
-    int nomber = int.Parse(Console.ReadLine());
     Process.Start(new ProcessStartInfo
     {
-        FileName = applications[nomber].ExePath,
+        FileName = applications[number].ExePath,
         UseShellExecute = true,
     });
 }
@@ -35,7 +35,7 @@ catch(Win32Exception ex) when (ex.NativeErrorCode ==740)
 {
     Process.Start(new ProcessStartInfo
     {
-        FileName = applications[20].ExePath,
+        FileName = applications[number].ExePath,
         UseShellExecute = true,
         Verb = "runas"
     });
