@@ -1,0 +1,15 @@
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\bin\Debug\net10.0\AiAssistant.exe
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\bin\Debug\net10.0\AiAssistant.deps.json
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\bin\Debug\net10.0\AiAssistant.runtimeconfig.json
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\bin\Debug\net10.0\AiAssistant.dll
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\bin\Debug\net10.0\AiAssistant.pdb
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.AssemblyInfoInputs.cache
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.AssemblyInfo.cs
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.csproj.CoreCompileInputs.cache
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.dll
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\refint\AiAssistant.dll
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.pdb
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssistant.genruntimeconfig.cache
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\ref\AiAssistant.dll
+C:\Users\Admin\source\repos\AiAssistant\AiAssistant\obj\Debug\net10.0\AiAssist.9BD03158.Up2Date
