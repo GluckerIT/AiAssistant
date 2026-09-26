@@ -5,7 +5,8 @@ using System.Text.RegularExpressions;
 
 
 
-IAppLocator appLocator = new AppLocatorRegistry();
+//IAppLocator appLocator = new AppLocatorRegistry();
+IAppLocator appLocator = new AppLocatorStartMenu();
 
 var applications = await appLocator.ListAsync();
 var index = 0;
