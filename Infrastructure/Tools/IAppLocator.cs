@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace AiAssistant.Infrastructure.Tools;
 
-public sealed record AppEntry(string Name, string ExecutablePath, string ExePath, string Source);
+public sealed record AppEntry(string Name, string InstallFolder, string ExecutablePath, string Source);
 
 public interface IAppLocator
 {

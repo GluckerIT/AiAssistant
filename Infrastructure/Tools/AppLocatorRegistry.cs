@@ -48,15 +48,26 @@ public class AppLocatorRegistry : IAppLocator
                 var installLocation = appKey.GetValue("InstallLocation") as string ?? string.Empty;
                 var displayIcon = appKey.GetValue("DisplayIcon") as string ?? string.Empty;
 
+                string? exePath = null;
+
+
                 int index = displayIcon.LastIndexOf(target, StringComparison.OrdinalIgnoreCase);
-                if (index > 0)
+                if (index!=-1)
                 {
-                    displayIcon = displayIcon.Substring(0, index + target.Length);
+                    var iconPath = displayIcon.Substring(0, index + target.Length);
+                    if(File.Exists(iconPath))
+                    {
+                        exePath = iconPath;
+                    }
                 }
-                else if (index == -1) continue;
+                if (exePath is null && !string.IsNullOrWhiteSpace(installLocation) && Directory.Exists(installLocation)){
+                    var exeFiles = Directory.GetFiles(installLocation, "*.exe", SearchOption.TopDirectoryOnly);
+                    exePath = exeFiles.FirstOrDefault();
+                }
+                if (exePath is null) continue;
 
 
-                result.Add(new AppEntry(name, installLocation, displayIcon, keyPath));
+                result.Add(new AppEntry(name, installLocation, exePath, keyPath));
             }
         }
 

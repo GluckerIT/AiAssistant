@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace AiAssistant.Infrastructure.Tools;
 
-public class AppLocatorStartMenu: IAppLocator
+public class AppLocatorStartMenu : IAppLocator
 {
-    public Task<IReadOnlyList<AppEntry>> ListAsync (CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<AppEntry>> ListAsync(CancellationToken cancellationToken = default)
     {
         var result = new List<AppEntry>();
 
@@ -46,7 +46,7 @@ public class AppLocatorStartMenu: IAppLocator
                     if (!File.Exists(targetPath)) continue;
 
                     var name = Path.GetFileNameWithoutExtension(shortcutPath);
-                    result.Add(new AppEntry(name, targetPath,targetPath, "StartMenu"));
+                    result.Add(new AppEntry(name, targetPath, targetPath, "StartMenu"));
                 }
                 catch (Exception)
                 {
@@ -54,29 +54,6 @@ public class AppLocatorStartMenu: IAppLocator
                 }
             }
         }
-
         return Task.FromResult<IReadOnlyList<AppEntry>>(result);
-    }
-
-    private static string? ResolveExecutablePath(string? displayIcon, string installLocation)
-    {
-        if (!string.IsNullOrWhiteSpace(displayIcon))
-        {
-            var commaIndex = displayIcon.LastIndexOf(',');
-            var pathPart = commaIndex >= 0 ? displayIcon[..commaIndex] : displayIcon;
-
-            if (pathPart.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) && File.Exists(pathPart))
-                return pathPart;
-        }
-
-        if (!string.IsNullOrWhiteSpace(installLocation) && Directory.Exists(installLocation))
-        {
-            var exeFiles = Directory.EnumerateFiles(installLocation, "*.exe", SearchOption.TopDirectoryOnly);
-            var firstExe = exeFiles.FirstOrDefault();
-            if (firstExe != null)
-                return firstExe;
-        }
-
-        return null;
     }
 }
