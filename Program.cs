@@ -3,10 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-
-
-IAppLocator appLocator = new AppLocatorRegistry();
+//IAppLocator appLocator = new AppLocatorRegistry();
 //IAppLocator appLocator = new AppLocatorStartMenu();
+IAppLocator appLocator = new AppLocatorAppsFolder();
 
 var applications = await appLocator.ListAsync();
 var index = 0;
