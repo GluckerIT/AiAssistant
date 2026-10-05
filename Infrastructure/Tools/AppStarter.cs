@@ -14,8 +14,9 @@ namespace AiAssistant.Infrastructure.Tools;
 
 public class AppStarter
 {
-    public async Task<IReadOnlyList<AppEntry>> GetAppListAsync()
+    public async Task<IReadOnlyList<AppEntry>> GetAppListAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         IAppLocator registryLocator = new AppLocatorRegistry();
         IAppLocator startMenuLocator = new AppLocatorStartMenu();
         IAppLocator startAppsLocator = new AppLocatorStartApps();
@@ -32,8 +33,12 @@ public class AppStarter
         {
             try
             {
-                var apps = await locator.ListAsync();
+                var apps = await locator.ListAsync(cancellationToken);
                 listApps.AddRange(apps);
+            }
+            catch(OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -42,4 +47,10 @@ public class AppStarter
         }
         return listApps;
     }
+
+
+
+
+
+
 }
