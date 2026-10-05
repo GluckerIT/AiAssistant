@@ -2,12 +2,25 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Linq;
+
+
+
+
+
+
 
 //IAppLocator appLocator = new AppLocatorRegistry();
 //IAppLocator appLocator = new AppLocatorStartMenu();
-IAppLocator appLocator = new AppLocatorStartApps();
+//IAppLocator appLocator = new AppLocatorStartApps();
 
-var applications = await appLocator.ListAsync();
+//var finalList = new List<AppEntry>();
+
+
+AppStarter starter = new AppStarter();
+starter.GetAppListAsync().Wait();
+var applications = await starter.GetAppListAsync();
+
 var index = 0;
 
 foreach (var app in applications)

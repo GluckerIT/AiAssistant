@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AiAssistant.Infrastructure.Tools;
 
-internal class AppLocatorStartApps : IAppLocator
+public class AppLocatorStartApps : IAppLocator
 {
     public class StartAppsEntry
     {
