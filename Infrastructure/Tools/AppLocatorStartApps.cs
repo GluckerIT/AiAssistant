@@ -27,8 +27,8 @@ public class AppLocatorStartApps : IAppLocator
             {"{6D809377-6AF0-444B-8957-A3773F02200E}", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)},
             {"{7C5A40EF-A0FB-4BFC-874A-C0F2E0B9FA8E}", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)},
             {"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}", Environment.GetFolderPath(Environment.SpecialFolder.System)},
-            {"{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}", Environment.GetFolderPath(Environment.SpecialFolder.SystemX86)}
-            //{"{F38BF404-1D43-42F2-9305-67DE0B28FC23}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)},
+            {"{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}", Environment.GetFolderPath(Environment.SpecialFolder.SystemX86)},
+            {"{5CD7AEE2-2219-4A67-B85D-6C9CE15660CB}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)},
         };
 
         cancellationToken.ThrowIfCancellationRequested();
