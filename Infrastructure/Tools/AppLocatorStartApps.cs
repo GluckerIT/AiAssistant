@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace AiAssistant.Infrastructure.Tools;
 
@@ -23,11 +24,11 @@ public class AppLocatorStartApps : IAppLocator
     {
         Dictionary<string, string> replacementAUMIDPath = new()
         {
-            {"{6D809377-6AF0-444B-8957-A3773F02200E}", @"C:\Program Files"},
-            {"{7C5A40EF-A0FB-4BFC-874A-C0F2E0B9FA8E}", @"C:\Program Files (x86)"},
-            {"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}", @"C:\Windows\System32"},
-            {"{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}", @"C:\Windows\SysWOW64"}
-            //{"{F38BF404-1D43-42F2-9305-67DE0B28FC23}", @"C:\Users\<Имя>\AppData\Local\Programs"},
+            {"{6D809377-6AF0-444B-8957-A3773F02200E}", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)},
+            {"{7C5A40EF-A0FB-4BFC-874A-C0F2E0B9FA8E}", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)},
+            {"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}", Environment.GetFolderPath(Environment.SpecialFolder.System)},
+            {"{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}", Environment.GetFolderPath(Environment.SpecialFolder.SystemX86)}
+            //{"{F38BF404-1D43-42F2-9305-67DE0B28FC23}", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)},
         };
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -63,12 +64,21 @@ public class AppLocatorStartApps : IAppLocator
             {
                 if(appIDPath.StartsWith(replacemetn.Key, StringComparison.OrdinalIgnoreCase))
                 {
-                    appIDPath = appIDPath.Replace(replacemetn.Key, replacemetn.Value);
+                    appIDPath = replacemetn.Value+ appIDPath.Substring(replacemetn.Key.Length);
                     break;
                 }
 
             }
-            result.Add(new AppEntry (app.Name, appIDPath, appIDPath, "StartApps"));
+            if(File.Exists(appIDPath))
+            {
+                result.Add(new AppEntry(app.Name, "", appIDPath, "StartApps"));
+            }
+            else
+            {
+                result.Add(new AppEntry(app.Name,appIDPath, "",  "StartApps"));
+
+            }
+
         }
         return result;
     }
