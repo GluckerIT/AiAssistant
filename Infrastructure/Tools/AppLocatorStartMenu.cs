@@ -43,7 +43,7 @@ public class AppLocatorStartMenu : IAppLocator
                     if(!File.Exists(targetPath)) continue;
 
                     var name = Path.GetFileNameWithoutExtension(shortcutPath);
-                    result.Add(new AppEntry(name, targetPath, targetPath, "Start Menu"));
+                    result.Add(new AppEntry(name, "", targetPath, "Start Menu"));
                 }
                 catch
                 {

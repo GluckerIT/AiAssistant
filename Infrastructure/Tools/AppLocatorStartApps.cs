@@ -60,11 +60,11 @@ public class AppLocatorStartApps : IAppLocator
         foreach (var app in startApps)
         {
             var appIDPath = app.AppID;
-            foreach (var replacemetn in replacementAUMIDPath)
+            foreach (var replacement in replacementAUMIDPath)
             {
-                if(appIDPath.StartsWith(replacemetn.Key, StringComparison.OrdinalIgnoreCase))
+                if(appIDPath.StartsWith(replacement.Key, StringComparison.OrdinalIgnoreCase))
                 {
-                    appIDPath = replacemetn.Value+ appIDPath.Substring(replacemetn.Key.Length);
+                    appIDPath = replacement.Value + appIDPath.Substring(replacement.Key.Length);
                     break;
                 }
 

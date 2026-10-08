@@ -67,7 +67,7 @@ public class AppLocatorRegistry : IAppLocator
                 if (exePath is null) continue;
 
 
-                result.Add(new AppEntry(name, installLocation, exePath, keyPath));
+                result.Add(new AppEntry(name, "", exePath, keyPath));
             }
         }
 
