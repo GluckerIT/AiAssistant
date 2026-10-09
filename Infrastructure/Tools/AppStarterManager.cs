@@ -55,7 +55,7 @@ public class AppStarterManager
         return listApps.OrderBy(a => a.Name).ToList();
     }
 
-    public IReadOnlyList<Application> DeduplicationList(IReadOnlyList<AppEntry> apps)
+    public IReadOnlyList<Application> DeduplicationAndMergeList(IReadOnlyList<AppEntry> apps)
     {
         var result = new List<Application>();
         var tempExe = new List<Application>();
@@ -117,14 +117,88 @@ public class AppStarterManager
         return result.OrderBy(a => a.Name).ToList();
     }
 
+    public enum LaunchResult
+    {
+        Success,
+        Failed,
+        Cancelled
+    }
+
+    public static LaunchResult TryStart (string fileName, string? arguments = null)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = fileName,
+            UseShellExecute = true
+        };
+        if(!string.IsNullOrEmpty(arguments))
+        {
+            startInfo.Arguments = arguments;
+        }
+        try
+        {
+            Process.Start(startInfo);
+            return LaunchResult.Success;
+        }
+        catch (Win32Exception ex2) when (ex2.NativeErrorCode == 1223)
+        {
+            Console.WriteLine(ex2.NativeErrorCode);
+            return LaunchResult.Cancelled;
+        }
+        catch (Win32Exception)
+        {
+            return LaunchResult.Failed;
+        }
+    }
+
+    public void LaunchApplication(Application app, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!string.IsNullOrEmpty(app.ExePath) && File.Exists(app.ExePath))
+        {
+            var result = TryStart(app.ExePath);
+            if (result == LaunchResult.Success)
+            {
+                Console.WriteLine($"Приложение {app.Name} успешно запущено.");
+                return;
+            }
+            else if (result == LaunchResult.Cancelled)
+            {
+                Console.WriteLine($"Запуск приложения {app.Name} был отменен пользователем.");
+                return;
+            }
+        }
+        if (!string.IsNullOrEmpty(app.ShellStart))
+        {
+            var result = TryStart("explorer.exe", $@"shell:AppsFolder\{app.ShellStart}");
+            if (result == LaunchResult.Success)
+            {
+                Console.WriteLine($"Приложение {app.Name} успешно запущено.");
+                return;
+            }
+            else if (result == LaunchResult.Cancelled)
+            {
+                Console.WriteLine($"Запуск приложения {app.Name} был отменен пользователем.");
+                return;
+            }
+            else if (result == LaunchResult.Failed)
+            {
+                Console.WriteLine($"Не удалось запустить приложение {app.Name}.");
+                return;
+            }
+
+        }
+        Console.WriteLine($"Не удалось запустить приложение {app.Name}.");
+        return;
+    }
+    
     public async Task StartProgram()
     {
         var cancellationTokenSource = new CancellationTokenSource();
         var applications = await GetAppListAsync(cancellationTokenSource.Token);
-        var uniqueApplications = DeduplicationList(applications);
+        var uniqueApplications = DeduplicationAndMergeList(applications);
         var index = 0;
-
-
 
         foreach (var app in uniqueApplications)
         {
@@ -135,37 +209,16 @@ public class AppStarterManager
             Console.WriteLine("----------------------------");
             index++;
         }
-
-        //foreach (var app in applications)
-        //{
-        //    Console.WriteLine($"Nomber: {index}");
-        //    Console.WriteLine($"Name: {app.Name}");
-        //    Console.WriteLine($"Launch not exe: {app.InstallFolder}");
-        //    Console.WriteLine($"Exe: {app.ExecutablePath}");
-        //    Console.WriteLine($"Source: {app.Source}");
-        //    Console.WriteLine("----------------------------");
-        //    index++;
-        //}
-
-        //Console.Write("Введите номер программы: ");
-        //int number = int.Parse(Console.ReadLine());
-        //try
-        //{
-        //    Process.Start(new ProcessStartInfo
-        //    {
-        //        FileName = applications[number].ExecutablePath,
-        //        UseShellExecute = true,
-        //    });
-        //}
-        //catch (Win32Exception ex) when (ex.NativeErrorCode == 740)
-        //{
-        //    Process.Start(new ProcessStartInfo
-        //    {
-        //        FileName = applications[number].ExecutablePath,
-        //        UseShellExecute = true,
-        //        Verb = "runas"
-        //    });
-        //}
+        Console.Write("Введите номер программы: ");
+        int number = int.Parse(Console.ReadLine());
+        if (number >= 0 && number < uniqueApplications.Count)
+        {
+            LaunchApplication(uniqueApplications[number], cancellationTokenSource.Token);
+        }
+        else
+        {
+            Console.WriteLine("Неверный номер программы.");
+        }
     }
 
 }
