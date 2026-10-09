@@ -209,7 +209,11 @@ public class AppStarterManager
             index++;
         }
         Console.Write("Введите номер программы: ");
-        int number = int.Parse(Console.ReadLine());
+        int number;
+        while(!int.TryParse(Console.ReadLine(), out number))
+        {
+            Console.Write("Введите корректный номер программы: ");
+        }
         if (number >= 0 && number < uniqueApplications.Count)
         {
             LaunchApplication(uniqueApplications[number], cancellationTokenSource.Token);
