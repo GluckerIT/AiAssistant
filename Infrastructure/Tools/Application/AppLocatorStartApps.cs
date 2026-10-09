@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
 
-namespace AiAssistant.Infrastructure.Tools;
+namespace AiAssistant.Infrastructure.Tools.Application;
 
 public class AppLocatorStartApps : IAppLocator
 {

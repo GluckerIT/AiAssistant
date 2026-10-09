@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AiAssistant.Infrastructure.Tools;
+namespace AiAssistant.Infrastructure.Tools.Application;
 
 public class AppLocatorStartMenu : IAppLocator
 {
