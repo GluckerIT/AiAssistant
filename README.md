@@ -8,22 +8,22 @@
 
 Сейчас реализовано:
 
-* поиск приложений через Windows Registry;
-* фильтрация системных и служебных записей;
+* поиск приложений через Start Menu и StartApp;
+* Полная дедубликация и фильтрация записей;
+* Запуск приложения используя .exe и AUMID;
 * поддержка отмены операций через `CancellationToken`;
 * базовая модель приложения `AppEntry`;
 * интерфейс `IAppLocator`.
-
-В процессе разработки:
 
 ## Tech stack
 
 * C#
 * .NET
-* Windows Registry
 * Windows Start Menu
+* Windows StartApp
 * AppX / MSIX
 * Git
+* SQLite
 
 ## Project goals
 
