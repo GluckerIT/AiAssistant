@@ -39,6 +39,11 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
+            using(var command= connection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA journal_mode = WAL;";
+                command.ExecuteNonQuery();
+            }
             using (var command = connection.CreateCommand())
             {
                 command.CommandText =
