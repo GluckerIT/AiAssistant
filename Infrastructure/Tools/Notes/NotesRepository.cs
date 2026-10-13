@@ -53,11 +53,11 @@ public class NotesRepository
         }
     }
 
-    public async Task UpdateNoteAsync( long noteId, string title, string content)
+    public void UpdateNote( long noteId, string title, string content)
     {
         using (var connection = new SqliteConnection(_connectionString))
         {
-            await connection.OpenAsync();
+            connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
                             @"
@@ -70,15 +70,16 @@ public class NotesRepository
             command.Parameters.AddWithValue("@Id", noteId);
             command.Parameters.AddWithValue("@Title", title);
             command.Parameters.AddWithValue("@Content", content);
-            await command.ExecuteNonQueryAsync();
+            command.ExecuteNonQuery();
+            
         }
     }
 
-    public async Task DeleteNoteAsync(long noteId)
+    public bool DeleteNote(long noteId)
     {
         using (var connection = new SqliteConnection(_connectionString))
         {
-            await connection.OpenAsync();
+            connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
                             @"
@@ -86,7 +87,8 @@ public class NotesRepository
                 WHERE Id = @Id
             ";
             command.Parameters.AddWithValue("@Id", noteId);
-            await command.ExecuteNonQueryAsync();
+            int rowsAffected = command.ExecuteNonQuery();
+            return rowsAffected > 0;
         }
     }
 
@@ -97,12 +99,12 @@ public class NotesRepository
         DateTime LastUpdatedAt
     );
 
-    public async Task<IReadOnlyList<Note>> GetAllNotesAsync()
+    public IReadOnlyList<Note> GetAllNotes()
     {
         var notes = new List<Note>();
         using (var connection = new SqliteConnection(_connectionString))
         {
-            await connection.OpenAsync();
+            connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
                             @"
@@ -110,9 +112,9 @@ public class NotesRepository
                 FROM Notes
                 ORDER BY LastUpdatedAt DESC
             ";
-            using (var reader = await command.ExecuteReaderAsync())
+            using (var reader = command.ExecuteReader())
             {
-                while (await reader.ReadAsync())
+                while (reader.Read())
                 {
                     var lastUpdatedAt = DateTime.SpecifyKind(
                             DateTime.Parse(
@@ -132,11 +134,11 @@ public class NotesRepository
         return notes;
     }
 
-    public async Task<long> CreateNoteAsync(string title, string content)
+    public long CreateNote(string title, string content)
     {
         using (var connection = new SqliteConnection(_connectionString))
         {
-            await connection.OpenAsync();
+            connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
                             @"
@@ -146,16 +148,16 @@ public class NotesRepository
             ";
             command.Parameters.AddWithValue("@Title", title);
             command.Parameters.AddWithValue("@Content", content);
-            var newNoteId = await command.ExecuteScalarAsync();
+            var newNoteId = command.ExecuteScalar();
             return (long)newNoteId;
         }
     }
 
-    public async Task<Note?> GetNoteByIdAsync(long noteId)
+    public Note? GetNoteById(long noteId)
     {
         using (var connection = new SqliteConnection(_connectionString))
         {
-            await connection.OpenAsync();
+            connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
                             @"
@@ -164,9 +166,9 @@ public class NotesRepository
                 WHERE Id = @Id
             ";
             command.Parameters.AddWithValue("@Id", noteId);
-            using (var reader = await command.ExecuteReaderAsync())
+            using (var reader = command.ExecuteReader())
             {
-                if (await reader.ReadAsync())
+                if (reader.Read())
                 {
                     var lastUpdatedAt = DateTime.SpecifyKind(
                             DateTime.Parse(
@@ -187,17 +189,80 @@ public class NotesRepository
     public void Main()
     {
         var notesRepository = new NotesRepository();
-        var noteId = notesRepository.CreateNoteAsync("Sample Note", "This is a sample note content.").Result;
-        Console.WriteLine($"Created Note with ID: {noteId}");
-        var note = notesRepository.GetNoteByIdAsync(noteId).Result;
-        if (note != null)
+        List<Note> notes = notesRepository.GetAllNotes().ToList();
+        foreach(var note in notes)
         {
-            Console.WriteLine($"Retrieved Note: {note.Title} - {note.Content}");
+            Console.WriteLine("--------------------");
+            Console.WriteLine($"Id: {note.Id}");
+            Console.WriteLine($"Title: {note.Title}");
+            Console.WriteLine($"Content: {note.Content}");
+            Console.WriteLine($"Last Updated At: {note.LastUpdatedAt}");
         }
-        notesRepository.UpdateNoteAsync(noteId, "Updated Sample Note", "This is the updated content.").Wait();
-        Console.WriteLine("Note updated.");
-        var allNotes = notesRepository.GetAllNotesAsync().Result;
-        Console.WriteLine($"Total Notes: {allNotes.Count}");
+
+
+
+        //Console.WriteLine("\nВведите Id заметки, которую хотите отредактировать:");
+        //int noteId;
+        //while(!int.TryParse(Console.ReadLine(), out noteId) || notesRepository.GetNoteById(noteId) == null)
+        //{
+        //    Console.Write("Заметка с таким id не найдена.Введите другой id: ");
+        //}
+
+        //Note noteById = notesRepository.GetNoteById(noteId);
         
+        //Console.WriteLine("Изменить заголовок заметки? (да/нет)");
+        //string response = Console.ReadLine();
+        //string newTitle = noteById.Title;
+        //string newContent = noteById.Content;
+        //while (response?.ToLower() != "да" && response?.ToLower() != "нет")
+        //{
+        //    Console.WriteLine("Введите корректный ответ (да/нет):");
+        //    response = Console.ReadLine();
+        //}
+        //if (response?.ToLower() == "да")
+        //{
+        //    Console.WriteLine($"Старый заголовок заметки:{noteById.Title}");
+        //    Console.Write("Введите новый заголовок заметки:");
+        //    newTitle = Console.ReadLine();
+        //}
+
+        //Console.WriteLine("Изменить содержание заметки? (да/нет)");
+        //string response2 = Console.ReadLine();
+        //while (response2?.ToLower() != "да" && response2?.ToLower() != "нет")
+        //{
+        //    Console.WriteLine("Введите корректный ответ (да/нет):");
+        //    response2 = Console.ReadLine();
+        //}
+        //if (response2?.ToLower() == "да")
+        //{
+        //    Console.WriteLine($"Старое содержание заметки:{noteById.Content}");
+        //    Console.Write("Введите новое содержание заметки:");
+        //    newContent = Console.ReadLine();
+        //}
+        //notesRepository.UpdateNote(noteId, newTitle, newContent);
+
+
+
+
+
+
+
+        //Console.WriteLine("\nВведите Id заметки, которую хотите удалить:");
+        //int number;
+        //while (!int.TryParse(Console.ReadLine(), out number))
+        //{
+        //    Console.Write("Введите корректный id: ");
+        //}
+
+
+        //var deletedNote = notesRepository.DeleteNote(number);
+        //if (deletedNote)
+        //{
+        //    Console.WriteLine($"Заметка с Id {number} удалена успешно.");
+        //}
+        //else
+        //{
+        //    Console.WriteLine($"Заметка с Id {number} не найдена.");
+        //}
     }
 }
