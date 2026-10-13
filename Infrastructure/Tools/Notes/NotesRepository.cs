@@ -12,15 +12,15 @@ namespace AiAssistant.Infrastructure.Tools.Notes;
 
 public class NotesRepository
 {
-    private readonly string _databasePath;
+    private readonly string _connectionString;
 
     public NotesRepository()
     {
-        _databasePath = BuildConnectionString();
+        _connectionString = PrepareConnectionString();
         InitializeDatabase();
     }
 
-    private string BuildConnectionString()
+    private string PrepareConnectionString()
     {
         var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var databaseDirectory = Path.Combine(localAppDataPath, "AiAssistant", "Notes");
@@ -36,7 +36,7 @@ public class NotesRepository
 
     private void InitializeDatabase()
     {
-        using (var connection = new SqliteConnection(_databasePath))
+        using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
             var command = connection.CreateCommand();
@@ -55,7 +55,7 @@ public class NotesRepository
 
     public async Task UpdateNoteAsync( long noteId, string title, string content)
     {
-        using (var connection = new SqliteConnection(_databasePath))
+        using (var connection = new SqliteConnection(_connectionString))
         {
             await connection.OpenAsync();
             var command = connection.CreateCommand();
@@ -76,7 +76,7 @@ public class NotesRepository
 
     public async Task DeleteNoteAsync(long noteId)
     {
-        using (var connection = new SqliteConnection(_databasePath))
+        using (var connection = new SqliteConnection(_connectionString))
         {
             await connection.OpenAsync();
             var command = connection.CreateCommand();
@@ -100,10 +100,10 @@ public class NotesRepository
     public async Task<IReadOnlyList<Note>> GetAllNotesAsync()
     {
         var notes = new List<Note>();
-        using (var conection = new SqliteConnection(_databasePath))
+        using (var connection = new SqliteConnection(_connectionString))
         {
-            await conection.OpenAsync();
-            var command = conection.CreateCommand();
+            await connection.OpenAsync();
+            var command = connection.CreateCommand();
             command.CommandText =
                             @"
                 SELECT Id, Title, Content, LastUpdatedAt
@@ -132,9 +132,9 @@ public class NotesRepository
         return notes;
     }
 
-    public async Task CreateNoteAsync(string title, string content)
+    public async Task<long> CreateNoteAsync(string title, string content)
     {
-        using (var connection = new SqliteConnection(_databasePath))
+        using (var connection = new SqliteConnection(_connectionString))
         {
             await connection.OpenAsync();
             var command = connection.CreateCommand();
@@ -146,7 +146,58 @@ public class NotesRepository
             ";
             command.Parameters.AddWithValue("@Title", title);
             command.Parameters.AddWithValue("@Content", content);
-            var result = await command.ExecuteScalarAsync();
+            var newNoteId = await command.ExecuteScalarAsync();
+            return (long)newNoteId;
         }
+    }
+
+    public async Task<Note?> GetNoteByIdAsync(long noteId)
+    {
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                            @"
+                SELECT Id, Title, Content, LastUpdatedAt
+                FROM Notes
+                WHERE Id = @Id
+            ";
+            command.Parameters.AddWithValue("@Id", noteId);
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    var lastUpdatedAt = DateTime.SpecifyKind(
+                            DateTime.Parse(
+                                reader.GetString(3),
+                                CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
+                    return new Note(
+                        reader.GetInt64(0),
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        lastUpdatedAt
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+    public void Main()
+    {
+        var notesRepository = new NotesRepository();
+        var noteId = notesRepository.CreateNoteAsync("Sample Note", "This is a sample note content.").Result;
+        Console.WriteLine($"Created Note with ID: {noteId}");
+        var note = notesRepository.GetNoteByIdAsync(noteId).Result;
+        if (note != null)
+        {
+            Console.WriteLine($"Retrieved Note: {note.Title} - {note.Content}");
+        }
+        notesRepository.UpdateNoteAsync(noteId, "Updated Sample Note", "This is the updated content.").Wait();
+        Console.WriteLine("Note updated.");
+        var allNotes = notesRepository.GetAllNotesAsync().Result;
+        Console.WriteLine($"Total Notes: {allNotes.Count}");
+        
     }
 }

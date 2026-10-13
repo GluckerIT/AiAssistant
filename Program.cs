@@ -8,5 +8,8 @@ using System.Threading.Tasks;
 
 
 AppStarterManager starter = new AppStarterManager();
-await starter.StartProgram();
+NotesRepository createNotes = new NotesRepository();
+
+createNotes.Main();
+//await starter.StartProgram();
 
