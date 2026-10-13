@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Threading.Tasks;
+using System.Globalization;
 
 
 namespace AiAssistant.Infrastructure.Tools.Notes;
@@ -113,11 +114,16 @@ public class NotesRepository
             {
                 while (await reader.ReadAsync())
                 {
+                    var lastUpdatedAt = DateTime.SpecifyKind(
+                            DateTime.Parse(
+                                reader.GetString(3),
+                                CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
+
                     var note = new Note(
                         reader.GetInt64(0),
                         reader.GetString(1),
                         reader.GetString(2),
-                        DateTime.Parse(reader.GetString(3))
+                        lastUpdatedAt
                     );
                     notes.Add(note);
                 }
@@ -126,4 +132,21 @@ public class NotesRepository
         return notes;
     }
 
+    public async Task CreateNoteAsync(string title, string content)
+    {
+        using (var connection = new SqliteConnection(_databasePath))
+        {
+            await connection.OpenAsync();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                            @"
+                INSERT INTO Notes (Title, Content, LastUpdatedAt)
+                VALUES (@Title, @Content, CURRENT_TIMESTAMP);
+                SELECT last_insert_rowid();
+            ";
+            command.Parameters.AddWithValue("@Title", title);
+            command.Parameters.AddWithValue("@Content", content);
+            var result = await command.ExecuteScalarAsync();
+        }
+    }
 }
