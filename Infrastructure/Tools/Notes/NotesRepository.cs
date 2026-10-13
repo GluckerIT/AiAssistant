@@ -203,6 +203,44 @@ public class NotesRepository
         return null;
     }
 
+    public List<Note> SearchNotes (string searchTerm)
+    {
+        var nores = new List<Note>();
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                                @"
+                    SELECT Id, Title, Content, LastUpdatedAt
+                    FROM Notes
+                    WHERE Title LIKE @SearchTerm OR Content LIKE @SearchTerm
+                    ORDER BY LastUpdatedAt DESC
+                ";
+                command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var lastUpdatedAt = DateTime.SpecifyKind(
+                                DateTime.Parse(
+                                    reader.GetString(3),
+                                    CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
+                        var note = new Note(
+                            reader.GetInt64(0),
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            lastUpdatedAt
+                        );
+                        nores.Add(note);
+                    }
+                }
+            }
+        }
+        return nores;
+    }
+
     public void Main()
     {
         var notesRepository = new NotesRepository();
@@ -216,8 +254,7 @@ public class NotesRepository
             Console.WriteLine($"Last Updated At: {note.LastUpdatedAt}");
         }
 
-
-
+        
         //Console.WriteLine("\nВведите Id заметки, которую хотите отредактировать:");
         //int noteId;
         //while(!int.TryParse(Console.ReadLine(), out noteId) || notesRepository.GetNoteById(noteId) == null)
@@ -226,7 +263,7 @@ public class NotesRepository
         //}
 
         //Note noteById = notesRepository.GetNoteById(noteId);
-        
+
         //Console.WriteLine("Изменить заголовок заметки? (да/нет)");
         //string response = Console.ReadLine();
         //string newTitle = noteById.Title;
