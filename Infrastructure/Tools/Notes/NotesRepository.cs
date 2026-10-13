@@ -39,9 +39,10 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-            @"
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                @"
                 CREATE TABLE IF NOT EXISTS Notes (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Title TEXT NOT NULL,
@@ -49,7 +50,8 @@ public class NotesRepository
                     LastUpdatedAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
             ";
-            command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
+            }
         }
     }
 
@@ -58,20 +60,22 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                            @"
-                UPDATE Notes
-                SET Title = @Title, 
-                    Content = @Content, 
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                                @"
+                    UPDATE Notes
+                    SET Title = @Title, 
+                        Content = @Content, 
                     LastUpdatedAt = CURRENT_TIMESTAMP
                 WHERE Id = @Id
             ";
-            command.Parameters.AddWithValue("@Id", noteId);
-            command.Parameters.AddWithValue("@Title", title);
-            command.Parameters.AddWithValue("@Content", content);
-            command.ExecuteNonQuery();
-            
+                command.Parameters.AddWithValue("@Id", noteId);
+                command.Parameters.AddWithValue("@Title", title);
+                command.Parameters.AddWithValue("@Content", content);
+                command.ExecuteNonQuery();
+
+            }
         }
     }
 
@@ -80,15 +84,17 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                            @"
-                DELETE FROM Notes
-                WHERE Id = @Id
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                                @"
+                    DELETE FROM Notes
+                    WHERE Id = @Id
             ";
-            command.Parameters.AddWithValue("@Id", noteId);
-            int rowsAffected = command.ExecuteNonQuery();
-            return rowsAffected > 0;
+                command.Parameters.AddWithValue("@Id", noteId);
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
+            }
         }
     }
 
@@ -105,29 +111,31 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                            @"
-                SELECT Id, Title, Content, LastUpdatedAt
-                FROM Notes
-                ORDER BY LastUpdatedAt DESC
-            ";
-            using (var reader = command.ExecuteReader())
+            using (var command = connection.CreateCommand())
             {
-                while (reader.Read())
+                command.CommandText =
+                                @"
+                    SELECT Id, Title, Content, LastUpdatedAt
+                    FROM Notes
+                    ORDER BY LastUpdatedAt DESC
+            ";
+                using (var reader = command.ExecuteReader())
                 {
-                    var lastUpdatedAt = DateTime.SpecifyKind(
-                            DateTime.Parse(
-                                reader.GetString(3),
-                                CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
+                    while (reader.Read())
+                    {
+                        var lastUpdatedAt = DateTime.SpecifyKind(
+                                DateTime.Parse(
+                                    reader.GetString(3),
+                                    CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
 
-                    var note = new Note(
-                        reader.GetInt64(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        lastUpdatedAt
-                    );
-                    notes.Add(note);
+                        var note = new Note(
+                            reader.GetInt64(0),
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            lastUpdatedAt
+                        );
+                        notes.Add(note);
+                    }
                 }
             }
         }
@@ -139,17 +147,19 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                            @"
-                INSERT INTO Notes (Title, Content, LastUpdatedAt)
-                VALUES (@Title, @Content, CURRENT_TIMESTAMP);
-                SELECT last_insert_rowid();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                                @"
+                    INSERT INTO Notes (Title, Content, LastUpdatedAt)
+                    VALUES (@Title, @Content, CURRENT_TIMESTAMP);
+                    SELECT last_insert_rowid();
             ";
-            command.Parameters.AddWithValue("@Title", title);
-            command.Parameters.AddWithValue("@Content", content);
-            var newNoteId = command.ExecuteScalar();
-            return (long)newNoteId;
+                command.Parameters.AddWithValue("@Title", title);
+                command.Parameters.AddWithValue("@Content", content);
+                var newNoteId = command.ExecuteScalar();
+                return (long)newNoteId;
+            }
         }
     }
 
@@ -158,28 +168,30 @@ public class NotesRepository
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                            @"
-                SELECT Id, Title, Content, LastUpdatedAt
-                FROM Notes
-                WHERE Id = @Id
-            ";
-            command.Parameters.AddWithValue("@Id", noteId);
-            using (var reader = command.ExecuteReader())
+            using (var command = connection.CreateCommand())
             {
-                if (reader.Read())
+                command.CommandText =
+                                @"
+                    SELECT Id, Title, Content, LastUpdatedAt
+                    FROM Notes
+                    WHERE Id = @Id
+                ";
+                command.Parameters.AddWithValue("@Id", noteId);
+                using (var reader = command.ExecuteReader())
                 {
-                    var lastUpdatedAt = DateTime.SpecifyKind(
-                            DateTime.Parse(
-                                reader.GetString(3),
-                                CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
-                    return new Note(
-                        reader.GetInt64(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        lastUpdatedAt
-                    );
+                    if (reader.Read())
+                    {
+                        var lastUpdatedAt = DateTime.SpecifyKind(
+                                DateTime.Parse(
+                                    reader.GetString(3),
+                                    CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
+                        return new Note(
+                            reader.GetInt64(0),
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            lastUpdatedAt
+                        );
+                    }
                 }
             }
         }
