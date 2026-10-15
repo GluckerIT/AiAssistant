@@ -60,8 +60,13 @@ public class NotesRepository
         }
     }
 
-    public void UpdateNote( long noteId, string title, string content)
+    public bool UpdateNote( long noteId, string title, string content)
     {
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
+        {
+            Console.WriteLine("Заголовок и содержание заметки не могут быть пустыми.");
+            return false;
+        }
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
@@ -79,7 +84,7 @@ public class NotesRepository
                 command.Parameters.AddWithValue("@Title", title);
                 command.Parameters.AddWithValue("@Content", content);
                 command.ExecuteNonQuery();
-
+                return true;
             }
         }
     }
@@ -149,6 +154,11 @@ public class NotesRepository
 
     public long CreateNote(string title, string content)
     {
+        if(string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
+        {
+            Console.WriteLine("Заголовок и содержание заметки не могут быть пустыми.");
+            return -1;
+        }
         using (var connection = new SqliteConnection(_connectionString))
         {
             connection.Open();
@@ -203,42 +213,24 @@ public class NotesRepository
         return null;
     }
 
-    public List<Note> SearchNotes (string searchTerm)
+    public IReadOnlyList<Note> SearchNotes (string searchTerm)
     {
-        var nores = new List<Note>();
-        using (var connection = new SqliteConnection(_connectionString))
+        if(string.IsNullOrWhiteSpace(searchTerm))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText =
-                                @"
-                    SELECT Id, Title, Content, LastUpdatedAt
-                    FROM Notes
-                    WHERE Title LIKE @SearchTerm OR Content LIKE @SearchTerm
-                    ORDER BY LastUpdatedAt DESC
-                ";
-                command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var lastUpdatedAt = DateTime.SpecifyKind(
-                                DateTime.Parse(
-                                    reader.GetString(3),
-                                    CultureInfo.InvariantCulture), DateTimeKind.Utc).ToLocalTime();
-                        var note = new Note(
-                            reader.GetInt64(0),
-                            reader.GetString(1),
-                            reader.GetString(2),
-                            lastUpdatedAt
-                        );
-                        nores.Add(note);
-                    }
-                }
-            }
+            return new List<Note>();
         }
-        return nores;
+        var notesList = GetAllNotes();
+        var results = new List<Note>();
+        foreach (var note in notesList)
+        {
+            if (note.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                note.Content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            {
+                results.Add(note);
+            }
+            
+        }
+        return results;
     }
 
     public void Main()
@@ -254,7 +246,16 @@ public class NotesRepository
             Console.WriteLine($"Last Updated At: {note.LastUpdatedAt}");
         }
 
-        
+        //List<Note> searchResults = notesRepository.SearchNotes("test").ToList();
+        //foreach (var note in searchResults)
+        //{
+        //    Console.WriteLine("--------------------");
+        //    Console.WriteLine($"Id: {note.Id}");
+        //    Console.WriteLine($"Title: {note.Title}");
+        //    Console.WriteLine($"Content: {note.Content}");
+        //    Console.WriteLine($"Last Updated At: {note.LastUpdatedAt}");
+        //}
+
         //Console.WriteLine("\nВведите Id заметки, которую хотите отредактировать:");
         //int noteId;
         //while(!int.TryParse(Console.ReadLine(), out noteId) || notesRepository.GetNoteById(noteId) == null)
