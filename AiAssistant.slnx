@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AiAssistant/AiAssistant.csproj" />
+  <Project Path="ASPAiAssistant/ASPAiAssistant.csproj" Id="f8677c91-d06f-4be9-8b5d-a14f03442fc3" />
+</Solution>
