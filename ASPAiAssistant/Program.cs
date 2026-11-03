@@ -1,5 +1,5 @@
 using AiAssistant.Infrastructure.Tools.Notes;
-
+using AiAssistant.Infrastructure.Tools.Application; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<AppStarterManager>();
 builder.Services.AddSingleton<NotesRepository>();
 builder.Services.AddSwaggerGen();
 
