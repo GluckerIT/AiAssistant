@@ -23,7 +23,7 @@ namespace ASPAiAssistant.Controllers
             return Ok(deduplicatedList);
         }
 
-        [HttpPost("launch/{id}")]
+        [HttpPost("launch/{id:int}")]
         public async Task<IActionResult> LaunchApplication(int id)
         {
             var appList = await _appStarterManager.GetAppListAsync();
