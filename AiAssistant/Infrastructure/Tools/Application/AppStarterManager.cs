@@ -13,6 +13,7 @@ namespace AiAssistant.Infrastructure.Tools.Application;
 public class AppStarterManager
 {
     public sealed record AppLaunch(
+        int Id,
         string Name  ,
         string ShellStart,
         string ExePath);
@@ -64,14 +65,14 @@ public class AppStarterManager
             {
                 if (!tempExe.Any(a => string.Equals(a.ExePath, app.ExecutablePath, StringComparison.OrdinalIgnoreCase)))
                 {
-                    tempExe.Add(new AppLaunch(app.Name, "", app.ExecutablePath));
+                    tempExe.Add(new AppLaunch(0, app.Name, "", app.ExecutablePath));
                 }
             }
             if (!string.IsNullOrEmpty(app.InstallFolder))
             {
                 if (!tempShellStart.Any(a => string.Equals(a.ShellStart, app.InstallFolder, StringComparison.OrdinalIgnoreCase)))
                 {
-                    tempShellStart.Add(new AppLaunch(app.Name, app.InstallFolder, ""));
+                    tempShellStart.Add(new AppLaunch(0, app.Name, app.InstallFolder, ""));
                 }
             }
         }
@@ -95,7 +96,7 @@ public class AppStarterManager
                 }
                 if (string.Equals(exeApp.Name, shellApp.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Add(new AppLaunch(exeApp.Name, shellApp.ShellStart, exeApp.ExePath));
+                    result.Add(new AppLaunch(exeApp.Id, exeApp.Name, shellApp.ShellStart, exeApp.ExePath));
                     deleteNumberExe.Add(tempExe.IndexOf(exeApp));
                     deleteNumberShellStart.Add(tempShellStart.IndexOf(shellApp));                   
                 }
@@ -111,8 +112,12 @@ public class AppStarterManager
         }
         result.AddRange(tempExe);
         result.AddRange(tempShellStart);
-
-        return result.OrderBy(a => a.Name).ToList();
+        result.OrderBy(a => a.Name).ToList();
+        for(int i = 0; i < result.Count; i++)
+        {
+            result[i] = result[i] with { Id = i + 1 };
+        }
+        return result;
     }
 
     public enum LaunchResult
@@ -196,6 +201,12 @@ public class AppStarterManager
         var cancellationTokenSource = new CancellationTokenSource();
         var applications = await GetAppListAsync(cancellationTokenSource.Token);
         var uniqueApplications = DeduplicationAndMergeList(applications);
+        
+        
+        
+        
+        
+        
         var index = 0;
 
         foreach (var app in uniqueApplications)
