@@ -25,14 +25,14 @@ public class NotesController : ControllerBase
         _notesRepository = notesRepository;
     }
 
-    [HttpGet]
+    [HttpGet("GetAllNotes")]
     public ActionResult<IReadOnlyList<NotesRepository.Note>> GetAllNotes()
     {
         var notes = _notesRepository.GetAllNotes();
         return Ok(notes);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("GetNote/{id:long}")]
     public ActionResult<NotesRepository.Note> GetNoteById(long id)
     {
         var note = _notesRepository.GetNoteById(id);
@@ -43,7 +43,7 @@ public class NotesController : ControllerBase
         return Ok(note);
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("DeleteNote/{id:long}")]
     public IActionResult DeleteNote(long id)
     {
         var deleted = _notesRepository.DeleteNote(id);
@@ -54,7 +54,7 @@ public class NotesController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost]
+    [HttpPost("CreateNote")]
     public ActionResult CreateNote([FromBody] NoteRequest note)
     {
         if (note == null || string.IsNullOrWhiteSpace(note.Title) || string.IsNullOrWhiteSpace(note.Content))
@@ -71,7 +71,7 @@ public class NotesController : ControllerBase
         return CreatedAtAction(nameof(GetNoteById), new { id = createdNote }, created);
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("UpdateNote/{id:long}")]
     public ActionResult UpdateNote(long id, [FromBody] NoteRequest note)
     {
         if (note == null || string.IsNullOrWhiteSpace(note.Title)|| string.IsNullOrWhiteSpace(note.Content))
