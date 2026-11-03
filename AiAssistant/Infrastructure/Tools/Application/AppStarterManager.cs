@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata.Ecma335;
-using Windows.ApplicationModel.Activation;
 
 namespace AiAssistant.Infrastructure.Tools.Application;
 
