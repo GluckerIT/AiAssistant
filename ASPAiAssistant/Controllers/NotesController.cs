@@ -1,8 +1,18 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AiAssistant.Infrastructure.Tools.Notes;
+using System.ComponentModel.DataAnnotations;
 
 namespace ASPAiAssistant.Controllers;
+
+public class NoteRequest
+{
+    [Required]
+    public string Title { get; set; } = "";
+    [Required]
+    public string Content { get; set; } = "";
+}
+
 
 [Route("api/[controller]")]
 [ApiController]
@@ -45,18 +55,24 @@ public class NotesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult CreateNote([FromBody] NotesRepository.Note note)
+    public ActionResult CreateNote([FromBody] NoteRequest note)
     {
         if (note == null || string.IsNullOrWhiteSpace(note.Title) || string.IsNullOrWhiteSpace(note.Content))
         {
             return BadRequest("Note title and content cannot be empty.");
         }
         var createdNote = _notesRepository.CreateNote(note.Title, note.Content);
-        return Ok(createdNote);
+        if (createdNote < 0)
+        {
+            return BadRequest("Note was not created.");
+        }
+
+        var created = _notesRepository.GetNoteById(createdNote);
+        return CreatedAtAction(nameof(GetNoteById), new { id = createdNote }, created);
     }
 
     [HttpPut("{id:long}")]
-    public ActionResult UpdateNote(long id, [FromBody] NotesRepository.Note note)
+    public ActionResult UpdateNote(long id, [FromBody] NoteRequest note)
     {
         if (note == null || string.IsNullOrWhiteSpace(note.Title)|| string.IsNullOrWhiteSpace(note.Content))
         {
@@ -72,3 +88,4 @@ public class NotesController : ControllerBase
         return NoContent();
     }
 }
+
